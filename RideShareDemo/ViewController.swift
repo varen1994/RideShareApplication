@@ -43,12 +43,12 @@ class ViewController: UIViewController,MKMapViewDelegate {
         self.mapView.addAnnotation(mkAnnotation2)
         mkAnnotation = MKPointAnnotation.init()
         mkAnnotation.coordinate = coordinatedOfSharerHome
-        mkAnnotation.title = "Sharer Home"
+        mkAnnotation.title = "Requester Home"
         self.mapView.addAnnotation(mkAnnotation)
         
         mkAnnotation2 = MKPointAnnotation.init()
         mkAnnotation2.coordinate = coordinatedOfSharerOffice;
-        mkAnnotation2.title = "Sharer Office"
+        mkAnnotation2.title = "Requester Office"
         self.mapView.addAnnotation(mkAnnotation2)
        
         self.addPathBetweenStartAndEnd(startCoordinates: coordinatedOfRiderHome, endCoordinates: coordinatedOfRiderOffice, rider: true)
@@ -164,7 +164,7 @@ class ViewController: UIViewController,MKMapViewDelegate {
         let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: MKMapViewDefaultAnnotationViewReuseIdentifier)
         annotationView?.annotation = annotation;
         annotationView?.canShowCallout = true;
-        if (annotation.title!?.contains("Sharer"))!
+        if (annotation.title!?.contains("Requester"))!
         {
              annotationView?.image = UIImage.init(named: "placeholder")
         }
