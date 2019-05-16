@@ -96,7 +96,7 @@ class ViewController: UIViewController,MKMapViewDelegate {
              let timeOfRider = "Rider Time To Reach His Office = \(Int.init((self.routeForRider?.expectedTravelTime)!)/60) minutes "
              let distanceOfRider = " Total Distance He Travelled is = \(self.routeForRider?.distance as! Double) meters"
             
-            self.showAlertViewWithAlert(message:timeOfRider+distanceOfRider )
+            self.showAlertViewWithAlert(message:timeOfRider+distanceOfRider, title: "Rider Alone Trip")
         }
         alertController.addAction(alertActionNo);
         alertController.addAction(alertActionYes);
@@ -106,18 +106,27 @@ class ViewController: UIViewController,MKMapViewDelegate {
     func foundRouteBetweenRiderHomeAndSharerHome() {  // Rider Home->Sharer Home -> Sharer Office -> Rider Office
         self.findTimeTakenToTravelBetween(startCoordinates: coordinatedOfRiderHome, endCoordinates: coordinatedOfSharerHome) { (timeTook, error,distance) in
             if error != nil {
-                self.showAlertViewWithAlert(message: error!)
+                self.showAlertViewWithAlert(message: error!, title: "")
             }
             else {
                 self.findTimeTakenToTravelBetween(startCoordinates: self.coordinatedOfSharerOffice, endCoordinates: self.coordinatedOfRiderOffice, completionHandler: { (timeTookFromSharerOfficeToRiderOffice, error,distanceFromSharerOfficeToRiderOffice) in
                     if error != nil {
-                          self.showAlertViewWithAlert(message: error!)
+                        self.showAlertViewWithAlert(message: error!, title: "")
                     }
                     else {
-                        let newDistance = "Total Distance =\(distance!+distanceFromSharerOfficeToRiderOffice!+(self.routeForSharer?.distance)!) meters"
+                        let newDist = distance!+distanceFromSharerOfficeToRiderOffice!+(self.routeForSharer?.distance)!
+                        let newDistanceStr = "Total Distance =\(newDist) meters"
                         let timeFromShareHomeToHisOffice = Int.init((self.routeForSharer?.expectedTravelTime)!/60)
                          let totalTime = "\nTotal Time =\(timeTook!+timeTookFromSharerOfficeToRiderOffice!+timeFromShareHomeToHisOffice) minutes"
-                        self.showAlertViewWithAlert(message: newDistance+totalTime)
+                        let extraDistance = "\n Extra Distance travelled = \(newDist-(self.routeForRider?.distance)!)"
+                        
+                        var messageIfCannotGo = ""
+                        if newDist-(self.routeForRider?.distance)!>2000 {
+                            messageIfCannotGo = "\n Rider Cannot Come Due to Extra distance > 1 Km"
+                        }
+                        
+                           self.showAlertViewWithAlert(message: newDistanceStr+totalTime+extraDistance+messageIfCannotGo, title: "Round Trip")
+                        
                     }
                 })
             }
@@ -174,8 +183,8 @@ class ViewController: UIViewController,MKMapViewDelegate {
     }
     
     //MARK:- ALERT VIEW
-    func showAlertViewWithAlert(message:String) {
-        let alertController = UIAlertController.init(title: "Alert", message: message, preferredStyle: .alert);
+    func showAlertViewWithAlert(message:String,title:String) {
+        let alertController = UIAlertController.init(title: title, message: message, preferredStyle: .alert);
          let alertActionOk = UIAlertAction.init(title: "Ok", style: .default, handler: nil)
          alertController.addAction(alertActionOk);
          self.present(alertController, animated: true, completion: nil);

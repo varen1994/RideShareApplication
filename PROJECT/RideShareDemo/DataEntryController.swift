@@ -23,12 +23,38 @@ class DataEntryController: UIViewController,UITextFieldDelegate {
     @IBOutlet weak var textFieldLatSharerOffice: UITextField!
     @IBOutlet weak var textFieldLongSharerOffice: UITextField!
     
+    @IBOutlet weak var bottomConstraintOfScrollView: NSLayoutConstraint!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: Notification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: Notification.Name.UIKeyboardWillHide, object: nil)
+
+        
     }
 
+    //MARK:- KEYBOARD NOTIFICATIONS
+    @objc func keyboardWillShow(notification: Notification) {
+        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if self.bottomConstraintOfScrollView.constant == 0.0  {
+                UIView.animate(withDuration: 1.0, animations: {
+                     self.bottomConstraintOfScrollView.constant -= keyboardSize.height
+                    self.view.layoutIfNeeded()
+                })
+            }
+        }
+    }
+    
+    @objc func keyboardWillHide(notification: Notification) {
+        UIView.animate(withDuration: 1.0, animations: {
+            self.bottomConstraintOfScrollView.constant = 0.0
+            self.view.layoutIfNeeded()
+        });
+    }
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -41,31 +67,46 @@ class DataEntryController: UIViewController,UITextFieldDelegate {
         let doubleValueLatRiderOffice = self.changeIntoFloatOrGive(text:self.textFieldLatOfficeCoordinates)
         let doubleValueLongRiderOffice = self.changeIntoFloatOrGive(text:self.textFieldLongOfficeCoordinates)
         
-        
         let doubleValueLatSharerHome = self.changeIntoFloatOrGive(text:self.textFiledLatSharerHome)
         let doubleValueLongSharerHome = self.changeIntoFloatOrGive(text:self.textFieldLongSharerHoe)
         let doubleValueLatSharerOffice = self.changeIntoFloatOrGive(text:self.textFieldLatSharerOffice)
         let doubleValueLongSharerOffice = self.changeIntoFloatOrGive(text:self.textFieldLongSharerOffice)
         
-        
-        let coordinate1 = CLLocationCoordinate2D.init(latitude: doubleValueLatRiderHome, longitude: doubleValueLongRiderHome)
-        let coordinate2 = CLLocationCoordinate2D.init(latitude: doubleValueLatRiderOffice, longitude: doubleValueLongRiderOffice)
-        let coordinate3 = CLLocationCoordinate2D.init(latitude: doubleValueLatSharerHome, longitude: doubleValueLongSharerHome)
-        let coordinate4 = CLLocationCoordinate2D.init(latitude: doubleValueLatSharerOffice, longitude: doubleValueLongSharerOffice)
-        
-        let nextVC = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-        nextVC.coordinatedOfRiderHome = coordinate1;
-        nextVC.coordinatedOfRiderOffice = coordinate2;
-        nextVC.coordinatedOfSharerHome = coordinate3;
-        nextVC.coordinatedOfSharerOffice = coordinate4;
-        self.navigationController?.pushViewController(nextVC, animated: true)
+        if (doubleValueLatRiderHome.1  && doubleValueLongRiderHome.1 && doubleValueLatRiderOffice.1 && doubleValueLongRiderOffice.1 && doubleValueLatSharerHome.1 && doubleValueLongSharerHome.1 && doubleValueLatSharerOffice.1 && doubleValueLongSharerOffice.1 )
+             {
+            let coordinate1 = CLLocationCoordinate2D.init(latitude: doubleValueLatRiderHome.0, longitude: doubleValueLongRiderHome.0)
+            let coordinate2 = CLLocationCoordinate2D.init(latitude: doubleValueLatRiderOffice.0, longitude: doubleValueLongRiderOffice.0)
+            let coordinate3 = CLLocationCoordinate2D.init(latitude: doubleValueLatSharerHome.0, longitude: doubleValueLongSharerHome.0)
+            let coordinate4 = CLLocationCoordinate2D.init(latitude: doubleValueLatSharerOffice.0, longitude: doubleValueLongSharerOffice.0)
+            
+            let nextVC = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+            nextVC.coordinatedOfRiderHome = coordinate1;
+            nextVC.coordinatedOfRiderOffice = coordinate2;
+            nextVC.coordinatedOfSharerHome = coordinate3;
+            nextVC.coordinatedOfSharerOffice = coordinate4;
+            self.navigationController?.pushViewController(nextVC, animated: true)
+        }
+        else {
+            self.showAlertViewWithAlert(message: "Invalid input.")
+            return ;
+        }
     }
     
-    func changeIntoFloatOrGive(text:UITextField)->Double {
+    
+    //MARK:- ALERT VIEW
+    func showAlertViewWithAlert(message:String) {
+        let alertController = UIAlertController.init(title: "Alert", message: message, preferredStyle: .alert);
+        let alertActionOk = UIAlertAction.init(title: "Ok", style: .default, handler: nil)
+        alertController.addAction(alertActionOk);
+        self.present(alertController, animated: true, completion: nil);
+    }
+    
+    
+    func changeIntoFloatOrGive(text:UITextField)->(Double,Bool) {
         if let lat = text.text, let doubleLat = Double(lat) {
-            return doubleLat // doubleLat is of type Double now
+            return (doubleLat,true) // doubleLat is of type Double now
         }
-        return 0.0;
+        return (0.0,false);
     }
     
     
